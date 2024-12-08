@@ -326,6 +326,51 @@ def edit_profile():
 
     return render_template("edit_username.html", username=current_user.username)
 
+@app.route("/profile/<username>", methods=["GET"])
+@login_required
+def user_profile(username):
+    user = users_collection.find_one({"username": username})
+    if not user:
+        flash("User not found.")
+        return redirect(url_for("home"))
+
+    user_posts = posts_collection.find({"user": username})
+    all_posts = []
+
+    for post in user_posts:
+        image_url = f"/image/{post['image_id']}"
+        all_posts.append({
+            "post_id": str(post["_id"]),
+            "title": post["title"],
+            "content": post["content"],
+            "image_url": image_url,
+            "created_at": post.get("created_at"),
+        })
+
+    is_following = current_user.username in user.get("followers", [])
+    return render_template("profile.html", posts=all_posts, username=username, is_following=is_following)
+
+@app.route("/follow/<username>", methods=["POST"])
+@login_required
+def follow_user(username):
+    user = users_collection.find_one({"username": username})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    cur_user = current_user.username
+
+    if cur_user in user.get("followers", []):
+        users_collection.update_one({"username": username}, {"$pull": {"followers": cur_user}})
+        action = "unfollowed"
+    else:
+        users_collection.update_one({"username": username}, {"$addToSet": {"followers": cur_user}})
+        action = "followed"
+
+    updated_user = users_collection.find_one({"username": username})
+    followers_count = len(updated_user.get("followers", []))
+
+    return jsonify({"action": action, "followers_count": followers_count})
+
 
 if __name__ == "__main__":
     # add_recommendations()

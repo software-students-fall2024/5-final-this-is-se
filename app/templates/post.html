@@ -106,7 +106,7 @@
         <img src="{{ image_url }}" alt="Post Image" style="max-width: 100%; height: auto;">
         <h2>{{ post.title }}</h2>
         <p>{{ post.content }}</p>
-        <p class="post-author">Posted by {{ post.user }}</p>
+	<a href="/profile/{{ post.user }}" class="post-author">Posted by {{ post.user }}</a>
         <br>
         <small>{{ post.created_at }}</small>
         <hr>

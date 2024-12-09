@@ -6,6 +6,8 @@
 
 "Pet Circle" is a containerized, cloud-enabled web application that functions as a pet-centric version of Instagram. It allows users to register, log in, and share their pet stories by uploading images for others to view, like, and comment on. Users can explore diverse profiles, follow the accounts they find appealing, and build a personalized feed showcasing only the posts from those they follow. Additionally, a built-in chat feature encourages direct interaction between users. For personalization, the platform lets users easily update their usernames whenever they wish. In short, Pet Circle is an engaging, community-driven space dedicated to celebrating beloved pets and the people who care for them.
 
+## Deploy Site
+http://138.197.92.147:5002
 
 ## Team
 

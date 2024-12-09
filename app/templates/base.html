@@ -126,7 +126,24 @@
                     font-size: 11px;
                     padding: 8px 12px;
                 }
-            }            
+            }  
+            .message {
+                margin-bottom: 10px;
+                padding: 8px;
+                border-radius: 5px;
+                max-width: 80%;
+            }
+            
+            .message-sent {
+                background-color: #dcf8c6;
+                align-self: flex-end;
+                margin-left: auto;
+            }
+            
+            .message-received {
+                background-color: #f1f0f0;
+                align-self: flex-start;
+            }          
         </style>
         {% block head %} {% endblock %}
         <title>Pet Circle</title>
@@ -146,6 +163,7 @@
                     <ul id="navigation">
                         <li><a href="/home">Home</a></li> 
                         <li><a href="/myInfo">My Info</a></li> 
+                        <li><a href="/chat">Chat</a></li>
                     </ul>
                 </nav>
             </header>

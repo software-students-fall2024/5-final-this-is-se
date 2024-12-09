@@ -33,8 +33,87 @@ __ToDo__:
 - Go to http://localhost:5002 
 - Stop: docker-compose down
 
-2. test
-- cd app
-- pip install -r requirements.txt
-- pip install pytest
-- pytest
+
+
+## How To Test
+1. Install pipenv (Suppose you have python. If not, download python first)
+    ```
+    pip install pipenv
+    ```
+
+
+2. Install Project Dependencies with Pipenv
+    ```
+    pipenv install --dev
+    ```
+
+
+3. Run Virtual Environment
+    ```
+    pipenv shell
+    ```
+4. Enter Editor Mode
+    ```
+    pip install -e .
+    ```
+
+5. Run pytest/python files
+    ```
+    pytest
+    ```
+
+
+
+
+## Contributing
+1. Fork the Repository:
+- [Our Project](https://github.com/software-students-fall2024/5-final-this-is-se.git)
+- Open our package and click "fork" to save files in your own repository
+
+
+2. Clone the Repository:<br>
+In your own repository, use<br>
+    ```
+    git clone <repository-url>
+    ```
+
+
+3. Navigate into the Project Directory<br>
+    ```
+    cd <project-repo>
+    ```
+
+
+4. Create a New Branch for Your Changes:<br>
+    ``` 
+    git checkout -b feature/my-new-feature
+    ```
+
+
+5. Install Dependencies<br>
+    see __How To Test/Run__
+
+
+6. Make Changes or Add Features
+
+
+7. Stage Your Changes<br>
+    ```
+    git add <file-name>
+    ```
+
+
+8. Commit Your Changes<br>
+    ```
+    git commit -m "your commit"
+    ```
+
+
+9. Push Your Branch to Your Fork<br>
+    ```
+    git push origin feature/my-new-feature
+    ```
+
+
+10. Create a Pull Request <br>
+In the PR, describe the changes you made and their purpose

@@ -13,6 +13,7 @@ import secrets
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max-limit
 
 mongo_uri = os.getenv('MONGO_URI')
 print(mongo_uri)
@@ -346,6 +347,7 @@ def follow_user(username):
 
     return jsonify({"action": action, "followers_count": followers_count})
 
+
 @app.route("/posts/<post_id>/comments", methods=["POST"])
 @login_required
 def add_comment(post_id):
@@ -402,7 +404,91 @@ def edit_profile():
 
     return render_template("edit_username.html", username=current_user.username)
 
+@app.route("/chat")
+@login_required
+def chat():
+    """
+    Render the chat page with list of users to chat with.
+    """
+    # Get all users except the current user
+    all_users = users_collection.find({"username": {"$ne": current_user.username}})
+    users_list = [user["username"] for user in all_users]
+    return render_template("chat.html", users=users_list)
 
+@app.route("/chat/<username>", methods=["GET"])
+@login_required
+def chat_with_user(username):
+    """
+    Render chat page with a specific user
+    """
+    # Check if the user exists
+    target_user = users_collection.find_one({"username": username})
+    if not target_user:
+        flash("User not found")
+        return redirect(url_for("chat"))
+
+    # Retrieve previous messages between current user and target user
+    messages_collection = db.messages
+    messages = messages_collection.find({
+        "$or": [
+            {"sender": current_user.username, "receiver": username},
+            {"sender": username, "receiver": current_user.username}
+        ]
+    }).sort("timestamp", 1)  # Sort messages chronologically
+
+    return render_template("chat_window.html", 
+                           target_username=username, 
+                           messages=list(messages),
+                           current_username=current_user.username)
+
+@app.route("/send_message", methods=["POST"])
+@login_required
+def send_message():
+    """
+    Handle sending a message
+    """
+    sender = current_user.username
+    receiver = request.form.get("receiver")
+    message = request.form.get("message")
+
+    if not message or not receiver:
+        return jsonify({"error": "Invalid message or receiver"}), 400
+
+    messages_collection = db.messages
+    message_doc = {
+        "sender": sender,
+        "receiver": receiver,
+        "message": message,
+        "timestamp": datetime.utcnow()
+    }
+
+    messages_collection.insert_one(message_doc)
+    return jsonify({"status": "success"})
+
+
+@app.route("/get_messages/<username>", methods=["GET"])
+@login_required
+def get_messages(username):
+    """
+    Retrieve messages between current user and specified user
+    """
+    messages_collection = db.messages
+    messages = messages_collection.find({
+        "$or": [
+            {"sender": current_user.username, "receiver": username},
+            {"sender": username, "receiver": current_user.username}
+        ]
+    }).sort("timestamp", 1)
+
+    message_list = []
+    for msg in messages:
+        message_list.append({
+            "sender": msg["sender"],
+            "message": msg["message"],
+            "timestamp": msg["timestamp"].isoformat()
+        })
+
+    return jsonify(message_list)
 
 if __name__ == "__main__":
     # add_recommendations()

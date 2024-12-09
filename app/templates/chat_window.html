@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block head %}
+<title>Chat with {{ target_username }} </title>
+{% endblock %}
+
+{% block container %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    Chat with {{ target_username }}
+                    <a href="{{ url_for('chat') }}" class="btn btn-sm btn-secondary float-right">Back to Users</a>
+                </div>
+                <div class="card-body" id="chat-messages" style="height: 400px; overflow-y: scroll;">
+                    {% for msg in messages %}
+                    <div class="message {% if msg.sender == current_username %}message-sent{% else %}message-received{% endif %}">
+                        <strong>{{ msg.sender }}:</strong> {{ msg.message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <form id="message-form">
+                        <div class="input-group">
+                            <input type="text" id="message-input" class="form-control" placeholder="Type a message...">
+                            <input type="hidden" id="receiver" value="{{ target_username }}">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const chatMessages = document.getElementById('chat-messages');
+    const receiver = document.getElementById('receiver').value;
+
+    // Scroll to bottom of messages
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    scrollToBottom();
+
+    // Fetch previous messages
+    async function fetchMessages() {
+        try {
+            const response = await fetch(`/get_messages/${receiver}`);
+            const messages = await response.json();
+            chatMessages.innerHTML = ''; // Clear existing messages
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(msg.sender === '{{ current_username }}' ? 'message-sent' : 'message-received');
+                messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
+                chatMessages.appendChild(messageDiv);
+            });
+            scrollToBottom();
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    }
+
+    // Send message
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        
+        if (!message) return;
+
+        try {
+            const response = await fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `receiver=${receiver}&message=${encodeURIComponent(message)}`
+            });
+
+            if (response.ok) {
+                messageInput.value = '';
+                await fetchMessages();
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    });
+
+    // Periodically fetch new messages
+    setInterval(fetchMessages, 5000);
+});
+</script>
+{% endblock %}
